@@ -11,13 +11,7 @@ from telegram import (
     ReplyKeyboardMarkup,
     KeyboardButton
 )
-from telegram.ext import (
-    Application, 
-    CommandHandler, 
-    MessageHandler, 
-    filters, 
-    ContextTypes, 
-    CallbackQueryHandler
+from telegram.ext import Updater, CommandHandler
 )
 from dotenv import load_dotenv
 
@@ -430,7 +424,7 @@ def main():
     bot = AyeshaBot()
     
     # Create Application
-    application = Application.builder().token(API_TOKEN).build()
+    application = Updater(token=API_TOKEN, use_context=True)
     
     # Add handlers
     application.add_handler(CommandHandler("start", bot.start))
