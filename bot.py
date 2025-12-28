@@ -1,124 +1,72 @@
-# Fix for Python 3.13 imghdr error
-import sys
-import types
-imghdr = types.ModuleType('imghdr')
-def what(*args, **kwargs):
-    return None
-imghdr.what = what
-sys.modules['imghdr'] = imghdr
-
 import os
 import logging
 from datetime import datetime
 
 import google.generativeai as genai
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Updater, CommandHandler, MessageHandler, filters, CallbackQueryHandler
+from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackQueryHandler, ContextTypes
 from dotenv import load_dotenv
 
 from database import MongoDB
 
-# Load environment variables
 load_dotenv()
 
-# Setup logging
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
 )
-logger = logging.getLogger(__name__)
 
-# Configuration
 API_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 MONGO_URI = os.getenv("MONGO_URI")
-OWNER_ID = int(os.getenv("OWNER_ID", "0"))
-DEVELOPER_USERNAME = os.getenv("DEVELOPER_USERNAME", "@YourUsername")
 
-# Group and Channel Links
-GROUP_LINK = os.getenv("GROUP_LINK", "https://t.me/your_group")
-CHANNEL_LINK = os.getenv("CHANNEL_LINK", "https://t.me/your_channel")
-DEVELOPER_LINK = f"https://t.me/{DEVELOPER_USERNAME.replace('@', '')}"
-
-# Configure Gemini
 if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
     model = genai.GenerativeModel('gemini-pro')
 else:
     model = None
 
-# Ayesha's Personality Prompt
-AYESHA_PERSONALITY = """You are Ayesha, a friendly, intelligent and empathetic Indian female AI assistant. You speak in natural Hinglish (Hindi + English). Keep responses short and conversational in Hinglish."""
-
 class AyeshaBot:
     def __init__(self):
-        if MONGO_URI:
-            try:
-                self.db = MongoDB()
-            except:
-                self.db = None
-        else:
-            self.db = None
+        self.db = MongoDB() if MONGO_URI else None
     
     def create_welcome_keyboard(self):
         keyboard = [
-            [InlineKeyboardButton("📢 Join Channel", url=CHANNEL_LINK)],
-            [InlineKeyboardButton("👥 Join Group", url=GROUP_LINK)],
-            [InlineKeyboardButton("👨‍💻 Developer", url=DEVELOPER_LINK)],
-            [InlineKeyboardButton("ℹ️ About", callback_data="about")],
-            [InlineKeyboardButton("🆘 Help", callback_data="help")]
+            [InlineKeyboardButton("📢 Join Channel", url="https://t.me/your_channel")],
+            [InlineKeyboardButton("👥 Join Group", url="https://t.me/your_group")],
+            [InlineKeyboardButton("👨‍💻 Developer", url="https://t.me/developer")]
         ]
         return InlineKeyboardMarkup(keyboard)
     
     def generate_response(self, message):
         if not model:
-            return "AI service unavailable. Try later."
+            return "AI service unavailable."
         try:
-            prompt = f"{AYESHA_PERSONALITY}\nUser: {message}\nAyesha:"
+            prompt = f"You are Ayesha, a friendly Indian AI assistant. Respond in Hinglish.\nUser: {message}\nAyesha:"
             response = model.generate_content(prompt)
             return response.text
         except:
-            return "Sorry, technical issue. Try again."
+            return "Sorry, technical issue."
     
-    def start(self, update, context):
+    async def start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         user = update.effective_user
-        text = f"Namaste {user.first_name}! I'm Ayesha. How can I help?"
-        update.message.reply_text(text, reply_markup=self.create_welcome_keyboard())
-        
-        if self.db:
-            self.db.create_user({
-                "user_id": user.id,
-                "first_name": user.first_name,
-                "username": user.username,
-                "joined": datetime.now()
-            })
+        text = f"Namaste {user.first_name}! I'm Ayesha."
+        await update.message.reply_text(text, reply_markup=self.create_welcome_keyboard())
     
-    def handle_message(self, update, context):
-        user_msg = update.message.text
-        response = self.generate_response(user_msg)
-        update.message.reply_text(response)
-    
-    def button_callback(self, update, context):
-        query = update.callback_query
-        query.answer()
-        
-        if query.data == "about":
-            query.edit_message_text("Ayesha Bot v1.0 - Your AI friend")
-        elif query.data == "help":
-            query.edit_message_text("Just type your message!")
+    async def handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        response = self.generate_response(update.message.text)
+        await update.message.reply_text(response)
 
 def main():
     bot = AyeshaBot()
-    updater = Updater(API_TOKEN, use_context=True)
-    dp = updater.dispatcher
     
-    dp.add_handler(CommandHandler("start", bot.start))
-    dp.add_handler(CallbackQueryHandler(bot.button_callback))
-    dp.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, bot.handle_message))
+    app = Application.builder().token(API_TOKEN).build()
     
-    logger.info("Starting Ayesha Bot...")
-    updater.start_polling()
-    updater.idle()
+    app.add_handler(CommandHandler("start", bot.start))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, bot.handle_message))
+    
+    print("Starting Ayesha Bot...")
+    app.run_polling()
 
 if __name__ == "__main__":
     main()
