@@ -37,13 +37,13 @@ logger = logging.getLogger(__name__)
 API_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 MONGO_URI = os.getenv("MONGO_URI")
-OWNER_ID = int(os.getenv("OWNER_ID", 0))  # Your Telegram ID
-DEVELOPER_USERNAME = os.getenv("DEVELOPER_USERNAME", "@YourUsername")
+OWNER_ID = int(os.getenv("7088510448", 0))  # Your Telegram ID
+DEVELOPER_USERNAME = os.getenv("DEVELOPER_USERNAME", "@PMOZIX68")
 
 # Group and Channel Links
-GROUP_LINK = os.getenv("GROUP_LINK", "https://t.me/your_group")
-CHANNEL_LINK = os.getenv("CHANNEL_LINK", "https://t.me/your_channel")
-DEVELOPER_LINK = f"https://t.me/{DEVELOPER_USERNAME.replace('@', '')}"
+GROUP_LINK = os.getenv("GROUP_LINK", "https://t.me/+9lOoGu_glUA0ZGVl")
+CHANNEL_LINK = os.getenv("CHANNEL_LINK", "https://t.me/+KKYgpQNCwbgwODdl")
+DEVELOPER_LINK = f"https://t.me/{DEVELOPER_USERNAME.replace('@', 'PMOZIX68')}"
 
 # Configure Gemini
 genai.configure(api_key=GEMINI_API_KEY)
