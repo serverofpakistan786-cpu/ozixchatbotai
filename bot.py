@@ -12,18 +12,6 @@ if sys.version_info.major == 3 and sys.version_info.minor >= 10:
     import collections
     setattr(collections, "MutableMapping", collections.abc.MutableMapping)
 
-# Rest of your existing imports...
-import os
-import logging
-from datetime import datetime
-# ... your existing code continues
-
-
-import sys
-if sys.version_info.major == 3 and sys.version_info.minor >= 10:
-    import collections
-    setattr(collections, "MutableMapping", collections.abc.MutableMapping)
-
 import os
 import logging
 from datetime import datetime
@@ -103,7 +91,7 @@ class AyeshaBot:
         ]
         return InlineKeyboardMarkup(keyboard)
     
-    async def generate_response(self, user_message: str, user_id: int) -> str:
+    def generate_response(self, user_message: str, user_id: int) -> str:
         """Generate response using Gemini AI"""
         if not model:
             return "AI service temporarily unavailable. Please try later. 🙏"
