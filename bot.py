@@ -1,3 +1,12 @@
+# Fix for Python 3.13 imghdr error
+import sys
+import types
+imghdr = types.ModuleType('imghdr')
+def what(*args, **kwargs):
+    return None
+imghdr.what = what
+sys.modules['imghdr'] = imghdr
+
 import os
 import logging
 from datetime import datetime
