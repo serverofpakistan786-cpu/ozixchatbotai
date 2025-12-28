@@ -1,17 +1,3 @@
-# Fix for Python 3.13 imghdr error
-import sys
-try:
-    import imghdr
-except ModuleNotFoundError:
-    class ImghdrDummy:
-        def what(self, *args):
-            return None
-    sys.modules['imghdr'] = ImghdrDummy()
-
-if sys.version_info.major == 3 and sys.version_info.minor >= 10:
-    import collections
-    setattr(collections, "MutableMapping", collections.abc.MutableMapping)
-
 import os
 import logging
 from datetime import datetime
