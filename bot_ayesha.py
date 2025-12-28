@@ -173,7 +173,7 @@ Chaliye shuru karte hain! Aap aaj kaise hain? 💖
         # Send welcome message with image
         try:
             # You can replace with your bot's photo URL
-            photo_url = "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=400"
+            photo_url = "https://files.catbox.moe/tlfirb.jpg"
             await update.message.reply_photo(
                 photo=photo_url,
                 caption=welcome_text,
